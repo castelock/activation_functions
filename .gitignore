@@ -131,6 +131,7 @@ dmypy.json
 # JPEG
 *.jpg
 *.jpeg
+.JPEG
 *.jpe
 *.jif
 *.jfif
