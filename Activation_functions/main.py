@@ -9,6 +9,7 @@ from tensorflow.keras.layers import Dense
 from tensorflow.keras import backend as K
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix
 from keras.optimizers import Adam
 from imutils import paths
 from time import time
@@ -84,10 +85,35 @@ model.add(Conv2D(64, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Flatten())
 model.add(Dense(1000, activation='relu'))
-model.add(Dense(num_classes, activation='softmax')) """
+model.add(Dense(num_classes, activation='softmax'))  """
+
+# Building a VGG16
+model = Sequential()
+model.add(Conv2D(input_shape=(224,224,3),filters=64,kernel_size=(3,3),padding="same", activation="relu"))
+model.add(Conv2D(filters=64,kernel_size=(3,3),padding="same", activation="relu"))
+model.add(MaxPooling2D(pool_size=(2,2),strides=(2,2)))
+model.add(Conv2D(filters=128, kernel_size=(3,3), padding="same", activation="relu"))
+model.add(Conv2D(filters=128, kernel_size=(3,3), padding="same", activation="relu"))
+model.add(MaxPooling2D(pool_size=(2,2),strides=(2,2)))
+model.add(Conv2D(filters=256, kernel_size=(3,3), padding="same", activation="relu"))
+model.add(Conv2D(filters=256, kernel_size=(3,3), padding="same", activation="relu"))
+model.add(Conv2D(filters=256, kernel_size=(3,3), padding="same", activation="relu"))
+model.add(MaxPooling2D(pool_size=(2,2),strides=(2,2)))
+model.add(Conv2D(filters=512, kernel_size=(3,3), padding="same", activation="relu"))
+model.add(Conv2D(filters=512, kernel_size=(3,3), padding="same", activation="relu"))
+model.add(Conv2D(filters=512, kernel_size=(3,3), padding="same", activation="relu"))
+model.add(MaxPooling2D(pool_size=(2,2),strides=(2,2)))
+model.add(Conv2D(filters=512, kernel_size=(3,3), padding="same", activation="relu"))
+model.add(Conv2D(filters=512, kernel_size=(3,3), padding="same", activation="relu"))
+model.add(Conv2D(filters=512, kernel_size=(3,3), padding="same", activation="relu"))
+model.add(MaxPooling2D(pool_size=(2,2),strides=(2,2)))
+model.add(Flatten())
+model.add(Dense(units=4096,activation="relu"))
+model.add(Dense(units=4096,activation="relu"))
+model.add(Dense(units=num_classes, activation="softmax"))
 
 # Building a customized CNN
-model = Sequential()
+""" model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3), strides=(1, 1), input_shape=input_shape))
 model.add(Activation(activation_tanh))
 model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
@@ -100,7 +126,7 @@ model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Flatten())
 model.add(Dense(1000))
 model.add(Activation(activation_tanh))
-model.add(Dense(num_classes, activation='softmax'))
+model.add(Dense(num_classes, activation='softmax')) """
 
 # Compiling the model
 print("Compiling model")
@@ -108,9 +134,9 @@ print("Compiling model")
 # Using Adam optimizer
 opt = Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.009, epsilon=0.1)
 
-# model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
+model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
 
-model.compile(loss="mean_squared_error", optimizer=opt, metrics=["accuracy"])
+# model.compile(loss="mean_squared_error", optimizer=opt, metrics=["accuracy"])
 
 # Training the model
 print("Training model")
@@ -126,5 +152,15 @@ history = model.fit(trainX, trainY, batch_size=32, epochs=epochs, validation_dat
 end_time = time()
 # Calculating training time
 total_time = end_time - start_time
+
+# Evaluating the CNN
+print("Evaluating network")
+predictions = model.predict(testX, batch_size=32)
+# Saving the classification report into a csv file with pandas
+report = classification_report(testY.argmax(axis=1), predictions.argmax(axis=1), target_names=lb.classes_)
+print(classification_report(testY.argmax(axis=1), predictions.argmax(axis=1), target_names=lb.classes_))
+
+# classification_report_csv(report, filename_class, num_classes)
+
 
 print("END")
